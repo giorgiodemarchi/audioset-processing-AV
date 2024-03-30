@@ -48,3 +48,6 @@ if __name__ == '__main__':
             print(f"Download/Upload failed for id: {video_url}")
             print(e)
         j+=1 
+
+        if j > 1000:
+            break

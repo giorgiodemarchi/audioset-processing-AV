@@ -18,7 +18,10 @@ def download_video(youtube_id, start_time, end_time, local_temp_dir="temp_output
     interval = str(end_time - start_time)
 
     # Get the direct URL of the best audio-video stream using yt-dlp
+    
+    ## Unsure if -f best works -- received weird warnings
     process = subprocess.run(["yt-dlp", "-f", "best", "-g", video_url], capture_output=True, text=True)
+    #process = subprocess.run(["yt-dlp", "-g", video_url], capture_output=True, text=True)
     direct_url = process.stdout.strip()
     
     # Check if yt-dlp succeeded
@@ -26,7 +29,7 @@ def download_video(youtube_id, start_time, end_time, local_temp_dir="temp_output
         print("yt-dlp failed:", process.stderr)
         return 1
     else:
-        command = ["ffmpeg", "-n", "-ss", start_time_str, "-t", interval, "-i", direct_url, local_file_name]
+        command = ["ffmpeg", "-n", "-loglevel", "quiet","-ss", start_time_str, "-t", interval, "-i", direct_url, local_file_name]
         exit_code = subprocess.run(command).returncode
 
     return exit_code, local_file_name
