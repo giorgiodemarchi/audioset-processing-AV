@@ -7,6 +7,9 @@ from io import StringIO
 def download_video(youtube_id, start_time, end_time, local_temp_dir="temp_output/"):
     """
     Runs commands with yt-dlp and ffmpeg to download an mp4 file and store it temporarily locally
+    
+    Sometimes there's this error:
+    ERROR: [youtube] video_id: Private video. Sign in if you've been granted access to this video
     """
     file_name = youtube_id + ".mp4"
     video_url = "https://www.youtube.com/watch?v=" + youtube_id
