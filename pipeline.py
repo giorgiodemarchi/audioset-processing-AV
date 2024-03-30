@@ -19,15 +19,7 @@ with open('secrets.txt', 'r') as f:
 df = pd.read_csv('audioset_data/audioset_eval_strong.tsv', sep='\t')
 segments_ids = df.segment_id.unique()
 
-## TODO: read from csv files and name convention
-video_url = "https://www.youtube.com/watch?v=cq-vfngNXMc"
-file_name = "video.mp4"
-local_file_name = "test_output/" + file_name
-s3_path = S3_DEST_DIR_KEY + file_name 
-START_TIME = 10
-END_TIME = 20
-
-def download_video(youtube_id, start_time, end_time, local_temp_dir="test_output/"):
+def download_video(youtube_id, start_time, end_time, local_temp_dir="temp_output/"):
     """
     Runs commands with yt-dlp and ffmpeg to download an mp4 file and store it temporarily locally
     """
@@ -51,8 +43,8 @@ def download_video(youtube_id, start_time, end_time, local_temp_dir="test_output
 
     return exit_code, local_file_name
 
-def free_local_memory():
-    pass
+def free_local_memory(local_file):
+    os.remove(local_file)
 
 
 def upload_video_to_s3(local_file, s3_path):
@@ -90,21 +82,26 @@ if __name__ == '__main__':
         start_time = video_df.start_time_seconds.min()
         end_time = video_df.end_time_seconds.max()
         
-        already_present, length = already_in_dataset(video_url, S3_DEST_DIR_KEY, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY)
+        already_present, length = already_in_dataset(video_url, bucket_name, S3_DEST_DIR_KEY, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY)
         if j%100==0:
-            print(f"{j} points in dataset.")
+            print(f"{length} points in dataset.")
 
         if already_present == 0:
             exit_code, local_file = download_video(video_url, start_time, end_time)
 
             if exit_code == 0:
+                # Put objects on S3
                 s3_path = "original_eval/" + str(video_url) + "/"
                 upload_video_to_s3(local_file, s3_path)
-                upload_metadata_to_s3(video_df, s3_path)
-                
-                ### REMOVE FROM LOCAL 
-                free_local_memory()
-            
+                upload_metadata_to_s3(video_df, s3_path, bucket_name, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY)
 
+                # Free local space
+                free_local_memory(local_file)
+        else:
+            print('already present')
+            
             j+=1
+        
+        if j > 3:
+            break
         

@@ -1,7 +1,7 @@
 import boto3
 
 
-def get_folder_names(directory_name, aws_access_key_id, aws_secret_access_key, bucket_name = 'detroit-project-data-bucket'):
+def get_folder_names(bucket_name, directory_name, aws_access_key_id, aws_secret_access_key):
     """
     Connect to S3 and read all folder (datapoints) names in the images dataset
     """
@@ -28,14 +28,12 @@ def get_folder_names(directory_name, aws_access_key_id, aws_secret_access_key, b
 
     return folder_names
 
-def already_in_dataset(video_id, directory_name, aws_access_key_id, aws_secret_access_key):
+def already_in_dataset(video_id, bucket_name, directory_name, aws_access_key_id, aws_secret_access_key):
     """
     Check if video_id is already in dataset
     
     """
-    coords_stored = []
-    items = get_folder_names(directory_name, aws_access_key_id, aws_secret_access_key)
-
+    items = get_folder_names(bucket_name, directory_name, aws_access_key_id, aws_secret_access_key)
     for item in items:
         if item == video_id:
             return 1, len(items)
