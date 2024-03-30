@@ -1,4 +1,4 @@
-# audioset-processing-AV
+# Audio-Video AudioSet Processing Toolkit
 Toolkit for downloading audio-video pairs from the Google Audioset dataset
 
 The pipeline includes:
