@@ -42,18 +42,16 @@ def create_metadata_file():
     keys = list_files(BUCKET_NAME, PREFIX)
     with open("data.jsonl", "w") as f:
         i=0
-        metadata_list = []
         for key in keys:
             i+=1
             if key.endswith('.mp4'):
                 metadata = process_file(key)
-                metadata_list.append(metadata)
-                
-            if i>8:
+                json_record = json.dumps(metadata)
+                f.write(json_record + "\n")
+            if i%100==0:
+                print(i)
+            if i>2000:
                 break
-        json_record = json.dumps(metadata_list)
-        f.write(json_record + "\n")
-
-
+        
 # Execute the function to create the metadata file
 create_metadata_file()
