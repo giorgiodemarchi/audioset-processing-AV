@@ -32,9 +32,10 @@ def process_file(key):
             "path": key,
             "duration": audio.duration,
             "sample_rate": audio.fps,
-            "amplitude": None,  # This will need additional library/logic to compute
-            "weight": None,     # Additional data computation
-            "info_path": None   # Path for additional info if any
+            "channels": audio.nchannels,
+            "amplitude": None,  
+            "weight": None,     
+            "info_path": None   
         }
 
 def create_metadata_file():
