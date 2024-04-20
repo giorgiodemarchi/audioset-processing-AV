@@ -1,7 +1,7 @@
 import pandas as pd
 import os 
 
-from utils.aws_utils import already_in_dataset
+from utils.aws_utils import already_in_dataset, get_folder_names
 from utils.utils import download_video, upload_metadata_to_s3, upload_video_to_s3, free_local_memory
 
 if __name__ == '__main__':
@@ -13,11 +13,16 @@ if __name__ == '__main__':
     AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
     bucket_name = os.environ.get("BUCKET_NAME")
 
+    ## Read current dataset
+
+    in_dataset = get_folder_names(bucket_name, S3_DEST_DIR_KEY, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY)
+
     # Download loop
     df = pd.read_csv(f'audioset_data/audioset_{SET}_strong.tsv', sep='\t')
     segments_ids = df.segment_id.unique()
-    j=0
+    j=1
     errors = 0
+
     for i, video_url in enumerate(segments_ids):
  
         try:
@@ -25,7 +30,10 @@ if __name__ == '__main__':
             start_time = int(video_url.split('_')[-1])/1000
             end_time = start_time + video_df.end_time_seconds.max()
             
-            already_present, length = already_in_dataset(video_url, bucket_name, S3_DEST_DIR_KEY, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY)
+            # already_present, length = already_in_dataset(video_url, bucket_name, S3_DEST_DIR_KEY, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY)
+
+            already_present = 1 if video_url in in_dataset else 0
+            length = len(in_dataset)
 
             if j%100==0:
                 print(f"{length} points in dataset.")
@@ -42,9 +50,12 @@ if __name__ == '__main__':
                     # Free local space
                     free_local_memory(local_file)
                     
+                    # Update list of urls in dataset
+                    in_dataset.append(video_url)
+
                     j+=1
-            else:
-                print('Already present')
+            # else:
+            #     print('Already present')
 
         except Exception as e:
             print(f"Download/Upload failed for id: {video_url}")
