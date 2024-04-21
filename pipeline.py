@@ -64,5 +64,5 @@ if __name__ == '__main__':
             print(errors)
         
 
-        if j > 15000:
+        if j > 35000:
             break
